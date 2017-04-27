@@ -130,7 +130,7 @@ int main()
 	 * Bind the socket to the address specified by @socksaddr
 	 */
 	rc = bind(sockfd, (struct sockaddr *)&socksaddr,
-		sizeof(struct sockaddr_in));
+			sizeof(struct sockaddr_in));
 	ON_ERROR_PERROR_GOTO(out, rc >= 0, bind, ret, EXIT_FAILURE);
 
 	rc = set_nonblock(sockfd);
