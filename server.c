@@ -61,6 +61,9 @@
 	}			\
 }
 
+/*
+ * Set a fd to non-blocking mode
+ */
 static int set_nonblock(int fd)
 {
 	int	optval = 1;
@@ -72,6 +75,9 @@ static int set_nonblock(int fd)
 			  sizeof(optval));
 }
 
+/*
+ * Set SO_REUSEPORT flag on a socket fd
+ */
 static int set_reuseport(int fd)
 {
 	int	flags;
@@ -144,7 +150,10 @@ int main()
 	ON_ERROR_PERROR_GOTO(out, epfd >= 0, epoll_create1, ret, EXIT_FAILURE);
 	
 	/*
-	 * Add the socket into readable watcher list
+	 * Add the socket into readable watcher list.
+	 *
+	 * As we use EPOLLONESHOT here, we need to re-arm the watcher everytime
+	 * epoll_wait() returns successfully
 	 */
 
 	ev.events = EPOLLIN | EPOLLONESHOT;
