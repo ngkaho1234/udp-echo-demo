@@ -52,7 +52,7 @@
 #define ON_ERROR_PERROR_GOTO(label, cond, func, ret, val) {	\
 	if (!(cond)) {	\
 		fprintf(stderr, "Error happens in %s:%d\n",	\
-			__func__, __LINE__);	\
+				__func__, __LINE__);	\
 		perror(#func);	\
 		(ret) = (val);	\
 		goto label;	\
@@ -106,7 +106,7 @@ int main()
 	buf = malloc(MAX_BUFSIZE);
 	if (!buf) {
 		fprintf(stderr, "Failed to allocate buffer with size %d!\n",
-			MAX_BUFSIZE);
+				MAX_BUFSIZE);
 		return EXIT_FAILURE;
 	}
 
