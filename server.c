@@ -51,14 +51,12 @@
  */
 #define ON_ERROR_PERROR_GOTO(label, cond, func, ret, val) {	\
 	if (!(cond)) {	\
-		fprintf(stderr,				\
-			"Error happens in %s:%d\n",	\
-			__func__,	\
-			__LINE__);	\
+		fprintf(stderr, "Error happens in %s:%d\n",	\
+			__func__, __LINE__);	\
 		perror(#func);	\
 		(ret) = (val);	\
 		goto label;	\
-	}			\
+	}	\
 }
 
 /*
@@ -68,11 +66,8 @@ static int set_nonblock(int fd)
 {
 	int	optval = 1;
 
-	return setsockopt(fd,
-			  SOL_SOCKET,
-			  SO_REUSEPORT,
-			  &optval,
-			  sizeof(optval));
+	return setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &optval,
+			sizeof(optval));
 }
 
 /*
@@ -110,8 +105,7 @@ int main()
 	ret = EXIT_SUCCESS;
 	buf = malloc(MAX_BUFSIZE);
 	if (!buf) {
-		fprintf(stderr,
-			"Failed to allocate buffer with size %d!\n",
+		fprintf(stderr, "Failed to allocate buffer with size %d!\n",
 			MAX_BUFSIZE);
 		return EXIT_FAILURE;
 	}
@@ -135,9 +129,8 @@ int main()
 	/*
 	 * Bind the socket to the address specified by @socksaddr
 	 */
-	rc = bind(sockfd,
-		  (struct sockaddr *)&socksaddr,
-		  sizeof(struct sockaddr_in));
+	rc = bind(sockfd, (struct sockaddr *)&socksaddr,
+		sizeof(struct sockaddr_in));
 	ON_ERROR_PERROR_GOTO(out, rc >= 0, bind, ret, EXIT_FAILURE);
 
 	rc = set_nonblock(sockfd);
@@ -148,7 +141,7 @@ int main()
 	 */
 	epfd = epoll_create1(0);
 	ON_ERROR_PERROR_GOTO(out, epfd >= 0, epoll_create1, ret, EXIT_FAILURE);
-	
+
 	/*
 	 * Add the socket into readable watcher list.
 	 *
@@ -159,7 +152,7 @@ int main()
 	ev.events = EPOLLIN | EPOLLONESHOT;
 	rc = epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &ev);
 	ON_ERROR_PERROR_GOTO(out, rc == 0, epoll_ctl, ret, EXIT_FAILURE);
-	
+
 	/*
 	 * Now we start our event loop
 	 */
@@ -167,11 +160,8 @@ int main()
 		rc = epoll_wait(epfd, &events, 1, -1);
 		if (rc < 0) {
 			if (errno != EINTR)
-				ON_ERROR_PERROR_GOTO(out,
-						     rc >= 0,
-						     epoll_wait,
-						     ret,
-						     EXIT_FAILURE);
+				ON_ERROR_PERROR_GOTO(out, rc >= 0, epoll_wait,
+						ret, EXIT_FAILURE);
 			/*
 			 * In case we receive a signal, we retry.
 			 */
@@ -186,19 +176,13 @@ int main()
 			/*
 			 * Receive data any clients sent to us
 			 */
-			nread = recvfrom(sockfd,
-					 buf,
-					 MAX_BUFSIZE,
-					 0,
-					 &insaddr,
-					 &insaddrlen);
+			nread = recvfrom(sockfd, buf, MAX_BUFSIZE, 0,
+					&insaddr, &insaddrlen);
 			if (nread < 0) {
 				if (errno != EINTR && errno != EAGAIN)
 					ON_ERROR_PERROR_GOTO(out,
-							     nread >= 0,
-							     recvfrom,
-							     ret,
-							     EXIT_FAILURE);
+						nread >= 0, recvfrom,
+						ret, EXIT_FAILURE);
 
 				/*
 				 * Actually it is quite awkward for EAGAIN to
@@ -223,21 +207,13 @@ int main()
 			/*
 			 * Send data back to the clients
 			 */
-			nwritten = sendto(sockfd,
-					  bufptr,
-					  datasize,
-					  0,
-					  &insaddr,
-					  insaddrlen);
+			nwritten = sendto(sockfd, bufptr, datasize, 0,
+					&insaddr, insaddrlen);
 			if (nwritten < 0) {
 				if (errno != EINTR && errno != EAGAIN)
 					ON_ERROR_PERROR_GOTO(out,
-							     nwritten >= 0,
-							     sendto,
-							     ret,
-							     EXIT_FAILURE);
-
-				
+						nwritten >= 0, sendto,
+						ret, EXIT_FAILURE);
 			} else {
 				datasize -= nwritten;
 				bufptr += nwritten;
